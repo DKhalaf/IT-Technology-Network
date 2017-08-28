@@ -1,0 +1,122 @@
+## Last changed: 2017-08-28 07:13:26 UTC
+version 12.1X47-D15.4;
+groups {
+    global;
+}
+system {
+    host-name vSRX-6;
+    root-authentication {
+        encrypted-password "$1$JIJjCz84$phS6QY3sgimoMOi/kjFN20"; ## SECRET-DATA
+    }
+    name-server {
+        208.67.222.222;
+        208.67.220.220;
+    }
+    services {
+        ssh;
+        telnet;
+        xnm-clear-text;
+        web-management {
+            http {
+                interface vlan.0;
+            }
+            https {
+                system-generated-certificate;
+                interface vlan.0;
+            }
+        }
+        dhcp {
+            router {
+                192.168.1.1;
+            }
+            pool 192.168.1.0/24 {
+                address-range low 192.168.1.2 high 192.168.1.254;
+            }
+            propagate-settings ge-0/0/0.0;
+        }
+    }
+    syslog {
+        archive size 100k files 3;
+        user * {
+            any emergency;
+        }
+        file messages {
+            any critical;
+            authorization info;
+        }
+        file interactive-commands {
+            interactive-commands error;
+        }
+    }
+    max-configurations-on-flash 5;
+    ##
+    ## Warning: statement ignored: unsupported platform (firefly-perimeter)
+    ##
+    max-configuration-rollbacks 5;
+    license {
+        autoupdate {
+            url https://ae1.juniper.net/junos/key_retrieval;
+        }
+    }
+}
+interfaces {
+    ge-0/0/0 {
+        unit 0 {
+            description to-vSRX5;
+            family inet {
+                address 172.20.20.2/24;
+            }
+        }
+    }
+    lo0 {
+        unit 0 {
+            family inet {
+                address 192.168.3.3/32;
+            }
+        }
+    }
+}
+routing-options {
+    router-id 192.168.3.3;
+    autonomous-system 15;
+}
+protocols {
+    bgp {
+        group internal-peers {
+            type internal;
+            description "connections to vSRX-5 and vSRX-3";
+            local-address 192.168.3.3;
+            export send-direct;
+            neighbor 192.168.3.2;
+            neighbor 192.168.3.1;
+        }
+    }
+    ospf {
+        area 0.0.0.1 {
+            interface lo0.0 {
+                passive;
+            }
+            interface ge-0/0/0.0;
+        }
+    }
+}
+policy-options {
+    policy-statement send-direct {
+        term 2 {
+            from protocol direct;
+            then accept;
+        }
+    }
+}
+security {
+    forwarding-options {
+        family {
+            mpls {
+                mode packet-based;
+            }
+            iso {
+                mode packet-based;
+            }
+        }
+    }
+}

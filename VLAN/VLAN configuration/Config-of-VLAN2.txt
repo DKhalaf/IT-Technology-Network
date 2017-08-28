@@ -1,0 +1,138 @@
+## Last changed: 2017-06-04 13:03:32 UTC
+version 12.1X46-D30.2;
+system {
+    host-name srxD-2;
+    root-authentication {
+        encrypted-password "$1$ZpRtRPU8$u4ezHJ37Y5J0k.hMclXoA/"; ## SECRET-DATA
+        ssh-dsa "ssh-dss AAAAB3NzaC1kc3MAAACBAMQrfP2bZyBXJ6PC7XXZ+MzErI8Jl6jah5L4/O8BsfP2hC7EvRfNoX7Mqbr                                                                                                           tCX/9gUH9gChVuBCB+ERULMdgRvM5uGhC/gs4UX+4dBbfBgKYYwgmisM8EoT25m7qI8ybpl2YZvHNznvO8h7kr4kpYuQEpKvgsTdH/Jl                                                                                                           e4Uqnjv7DAAAAFQDZaqA6QAgbW3O/zveaLCIDj6p0dwAAAIB1iL+krWrXiD8NPpY+w4dWXEqaV3bnobzPC4eyxQKBUCOr80Q5YBlWXVB                                                                                                           Hx9elwBWZwj0SF4hLKHznExnLerVsMuTMA846RbQmSz62vM6kGM13HFonWeQvWia0TDr78+rOEgWF2KHBSIxL51lmIDW8Gql9hJfD/Dr                                                                                                           /NKP97w3L0wAAAIEAr3FkWU8XbYytQYEKxsIN9P1UQ1ERXB3G40YwqFO484SlyKyYCfaz+yNsaAJu2C8UebDIR3GieyNcOAKf3inCG8j                                                                                                           QwjLvZskuZwrvlsz/xtcxSoAh9axJcdUfSJYMW/g+mD26JK1Cliw5rwp2nH9kUrJxeI7IReDp4egNkM4i15o= configurator@serve                                                                                                            r1.he"; ## SECRET-DATA
+    }
+    login {
+        user lab {
+            uid 2000;
+            class super-user;
+            authentication {
+                encrypted-password "$1$84J5Maes$cni5Hrazbd/IEHr/50oY30"; ## SECRET-DATA
+            }
+        }
+    }
+    services {
+        ftp;
+        ssh;
+        telnet;
+        netconf {
+            ssh;
+        }
+        web-management {
+            http {
+                interface ge-0/0/0.0;
+            }
+            https {
+                system-generated-certificate;
+                interface all;
+            }
+        }
+    }
+    syslog {
+        file messages {
+            any critical;
+            authorization info;
+        }
+        file interactive-commands {
+            interactive-commands any;
+        }
+    }
+}
+interfaces {
+    ge-0/0/0 {
+        description "MGMT Interface - DO NOT DELETE";
+        unit 0 {
+            family inet {
+                address 10.210.14.150/24;
+            }
+        }
+    }
+    ge-0/0/2 {
+        unit 0 {
+            family ethernet-switching {
+                port-mode trunk;
+                vlan {
+                    members [ vlan-tech vlan-admin ];
+                }
+            }
+        }
+    }
+    ge-0/0/3 {
+        unit 0 {
+            family ethernet-switching {
+                port-mode access;
+                vlan {
+                    members vlan-admin;
+                }
+            }
+        }
+    }
+    ge-0/0/4 {
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members vlan-tech;
+                }
+            }
+        }
+    }
+    lo0 {
+        unit 0 {
+            family inet {
+                address 192.168.1.1/32;
+            }
+        }
+    }
+    vlan {
+        unit 10 {
+            family inet {
+                address 192.168.1.1/24;
+            }
+        }
+        unit 20 {
+            family inet {
+                address 192.168.2.1/24;
+            }
+        }
+    }
+}
+security {
+    forwarding-options {
+        family {
+            iso {
+                mode packet-based;
+            }
+        }
+    }
+}
+routing-instances {
+    vrvlan {
+        instance-type virtual-router;
+        interface vlan.10;
+    }
+    vrvlan2 {
+        instance-type virtual-router;
+        interface vlan.20;
+    }
+}
+vlans {
+    vlan-admin {
+        vlan-id 10;
+        interface {
+            ge-0/0/3.0;
+        }
+        l3-interface vlan.10;
+    }
+    vlan-tech {
+        vlan-id 20;
+        interface {
+            ge-0/0/4.0;
+        }
+        l3-interface vlan.20;
+    }
+}
+

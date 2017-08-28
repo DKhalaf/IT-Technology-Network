@@ -1,0 +1,145 @@
+## Last changed: 2017-06-02 00:51:31 UTC
+version 12.1X46-D30.2;
+system {
+    host-name SRX-A4;
+    root-authentication {
+        encrypted-password "$1$VHyIWhsl$GpERroh6a22orYL3it6XV/"; ## SECRET-DATA
+    }
+    login {
+        user nick {
+            uid 2001;
+            class super-user;
+            authentication {
+                encrypted-password "$1$GQl.iPWl$nmn6pK./0lPyQX./Oh1CD/"; ## SECRET-DATA
+            }
+        }
+    }
+    services {
+        ssh;
+        telnet;
+        web-management {
+            http;
+        }
+    }
+}
+interfaces {
+    ge-0/0/0 {
+        description "DO NOT DELETE";
+        unit 0 {
+            family inet {
+                address 10.210.14.136/26;
+            }
+        }
+    }
+    lt-0/0/0 {
+        unit 1 {
+            encapsulation ethernet;
+            peer-unit 2;
+            family inet6 {
+                address fdaa:dead:beef:1::0/127;
+            }
+        }
+        unit 2 {
+            encapsulation ethernet;
+            peer-unit 1;
+            family inet6 {
+                address fdaa:dead:beef:1::1/127;
+            }
+        }
+        unit 3 {
+            encapsulation ethernet;
+            peer-unit 4;
+            family inet6 {
+                address fdaa:dead:beef:2::0/127;
+            }
+        }
+        unit 4 {
+            encapsulation ethernet;
+            peer-unit 3;
+            family inet6 {
+                address fdaa:dead:beef:2::1/127;
+            }
+        }
+    }
+    lo0 {
+        unit 1 {
+            family inet6 {
+                address fdaa:dead:beef:9::1/128;
+            }
+        }
+        unit 2 {
+            family inet6 {
+                address fdaa:dead:beef:9::2/128;
+            }
+        }
+        unit 3 {
+            family inet6 {
+                address fdaa:dead:beef:9::3/128;
+            }
+        }
+    }
+}
+security {
+    forwarding-options {
+        family {
+            inet6 {
+                mode packet-based;
+            }
+            mpls {
+                mode packet-based;
+            }
+        }
+    }
+}
+routing-instances {
+    vSRX1 {
+        instance-type virtual-router;
+        interface lt-0/0/0.1;
+        interface lo0.1;
+        routing-options {
+            router-id 192.168.1.1;
+        }
+        protocols {
+            ospf3 {
+                area 0.0.0.0 {
+                    interface lt-0/0/0.1;
+                    interface lo0.1;
+                }
+            }
+        }
+    }
+    vSRX2 {
+        instance-type virtual-router;
+        interface lt-0/0/0.2;
+        interface lt-0/0/0.3;
+        interface lo0.2;
+        routing-options {
+            router-id 192.168.2.1;
+        }
+        protocols {
+            ospf3 {
+                area 0.0.0.0 {
+                    interface lt-0/0/0.2;
+                    interface lt-0/0/0.3;
+                    interface lo0.2;
+                }
+            }
+        }
+    }
+    vSRX3 {
+        instance-type virtual-router;
+        interface lt-0/0/0.4;
+        interface lo0.3;
+        routing-options {
+            router-id 192.168.3.1;
+        }
+        protocols {
+            ospf3 {
+                area 0.0.0.0 {
+                    interface lt-0/0/0.4;
+                    interface lo0.3;
+                }
+            }
+        }
+    }
+}
